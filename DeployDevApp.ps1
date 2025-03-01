@@ -1,14 +1,14 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Ö÷´°ÌåÉèÖÃ
+# ä¸»çª—ä½“è®¾ç½®
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "¿ª·¢»·¾³Ò»¼ü°²×°¹¤¾ß"
+$form.Text = "å¼€å‘ç¯å¢ƒä¸€é”®å®‰è£…å·¥å…·"
 $form.Size = New-Object System.Drawing.Size(520,690)
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $form.Font = New-Object System.Drawing.Font("Microsoft YaHei", 10)
 
-# Ó¦ÓÃÅäÖÃ£¨ÏÔÊ¾Ãû³Æ | Winget ID | °²×°Ä¿Â¼£©
+# åº”ç”¨é…ç½®ï¼ˆæ˜¾ç¤ºåç§° | Winget ID | å®‰è£…ç›®å½•ï¼‰
 $appConfig = @(
     [PSCustomObject]@{Name="Miniconda3"; ID="Anaconda.Miniconda3"; Path="Miniconda3"},
     [PSCustomObject]@{Name="UV"; ID="astral-sh.uv"; Path="uv"},
@@ -17,14 +17,16 @@ $appConfig = @(
     [PSCustomObject]@{Name="Rustup"; ID="Rustlang.Rustup"; Path="rustup"},
     [PSCustomObject]@{Name="JetBrains ToolBox"; ID="JetBrains.Toolbox"; Path="jetBrains\toolbox"},
     [PSCustomObject]@{Name="VSCode"; ID="Microsoft.VisualStudioCode"; Path="vscode"},
-    [PSCustomObject]@{Name="VS2022 Build Tool"; ID="Microsoft.VisualStudio.2022.BuildTools"; Path="vs2022_buildtools"}
+    [PSCustomObject]@{Name="VS2022"; ID="Microsoft.VisualStudio.2022.Community"; Path="vs2022"},
+    [PSCustomObject]@{Name="Ninja"; ID="Ninja-build.Ninja"; Path="ninja"},
+    [PSCustomObject]@{Name="CMake"; ID="Kitware.CMake"; Path="cmake"}
 )
 
-# Ä¿Â¼Ñ¡Ôñ¿Ø¼ş
+# ç›®å½•é€‰æ‹©æ§ä»¶
 $labelDir = New-Object System.Windows.Forms.Label
 $labelDir.Location = New-Object System.Drawing.Point(20, 10)
 $labelDir.Size = New-Object System.Drawing.Size(200, 30)
-$labelDir.Text = "Ñ¡Ôñ»ù´¡°²×°Ä¿Â¼:"
+$labelDir.Text = "é€‰æ‹©åŸºç¡€å®‰è£…ç›®å½•:"
 
 $txtDir = New-Object System.Windows.Forms.TextBox
 $txtDir.Location = New-Object System.Drawing.Point(20, 40)
@@ -34,27 +36,27 @@ $txtDir.Text = "C:\Develop"
 $btnBrowse = New-Object System.Windows.Forms.Button
 $btnBrowse.Location = New-Object System.Drawing.Point(400, 40)
 $btnBrowse.Size = New-Object System.Drawing.Size(90, 30)
-$btnBrowse.Text = "ä¯ÀÀ..."
+$btnBrowse.Text = "æµè§ˆ..."
 
-# Èí¼şÑ¡ÔñÃæ°å£¨´ø¹ö¶¯Ìõ£©
+# è½¯ä»¶é€‰æ‹©é¢æ¿ï¼ˆå¸¦æ»šåŠ¨æ¡ï¼‰
 $groupApps = New-Object System.Windows.Forms.GroupBox
 $groupApps.Location = New-Object System.Drawing.Point(20, 80)
 $groupApps.Size = New-Object System.Drawing.Size(460, 360)
-$groupApps.Text = "Ñ¡ÔñÒª°²×°µÄÈí¼ş"
+$groupApps.Text = "é€‰æ‹©è¦å®‰è£…çš„è½¯ä»¶"
 
 $scrollPanel = New-Object System.Windows.Forms.Panel
 $scrollPanel.Location = New-Object System.Drawing.Point(10, 20)
 $scrollPanel.Size = New-Object System.Drawing.Size(420, 320)
 $scrollPanel.AutoScroll = $true
 
-# ¶¯Ì¬Éú³É¸´Ñ¡¿ò
+# åŠ¨æ€ç”Ÿæˆå¤é€‰æ¡†
 $yPos = 0
 foreach ($app in $appConfig) {
     $cb = New-Object System.Windows.Forms.CheckBox
     $cb.Location = New-Object System.Drawing.Point(10, $yPos)
     $cb.Size = New-Object System.Drawing.Size(360, 30)
     $cb.Text = $app.Name
-    $cb.Tag = $app.ID  # ´æ´¢Êµ¼ÊID
+    $cb.Tag = $app.ID  # å­˜å‚¨å®é™…ID
     $cb.Checked = $true
     $scrollPanel.Controls.Add($cb)
     $yPos += 30
@@ -62,43 +64,43 @@ foreach ($app in $appConfig) {
 $scrollPanel.AutoScrollMinSize = New-Object System.Drawing.Size(0, $yPos)
 $groupApps.Controls.Add($scrollPanel)
 
-# ½ø¶ÈÏÔÊ¾ÇøÓò
+# è¿›åº¦æ˜¾ç¤ºåŒºåŸŸ
 $txtLog = New-Object System.Windows.Forms.RichTextBox
 $txtLog.Location = New-Object System.Drawing.Point(20, 450)
-$txtLog.Size = New-Object System.Drawing.Size(460, 90)  # µ÷Ğ¡¸ß¶È
+$txtLog.Size = New-Object System.Drawing.Size(460, 90)  # è°ƒå°é«˜åº¦
 $txtLog.ReadOnly = $true
 
-# ½ø¶ÈÌõ
+# è¿›åº¦æ¡
 $progressBar = New-Object System.Windows.Forms.ProgressBar
 $progressBar.Location = New-Object System.Drawing.Point(20, 550)
 $progressBar.Size = New-Object System.Drawing.Size(460, 30)
 $progressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Continuous
 
-# °²×°°´Å¥
+# å®‰è£…æŒ‰é’®
 $btnInstall = New-Object System.Windows.Forms.Button
 $btnInstall.Location = New-Object System.Drawing.Point(20, 600)
 $btnInstall.Size = New-Object System.Drawing.Size(100, 35)
-$btnInstall.Text = "¿ªÊ¼°²×°"
+$btnInstall.Text = "å¼€å§‹å®‰è£…"
 
-# ¿Ø¼şÌí¼Óµ½´°Ìå
+# æ§ä»¶æ·»åŠ åˆ°çª—ä½“
 $form.Controls.AddRange(@(
     $labelDir, $txtDir, $btnBrowse, $groupApps, 
     $txtLog, $progressBar, $btnInstall
 ))
 
-# ä¯ÀÀÄ¿Â¼ÊÂ¼ş
+# æµè§ˆç›®å½•äº‹ä»¶
 $btnBrowse.Add_Click({
     $folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog
-    $folderDialog.Description = "Ñ¡Ôñ»ù´¡°²×°Ä¿Â¼"
+    $folderDialog.Description = "é€‰æ‹©åŸºç¡€å®‰è£…ç›®å½•"
     if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
         $txtDir.Text = $folderDialog.SelectedPath
     }
 })
 
-# °²×°ÊÂ¼ş´¦Àí
+# å®‰è£…äº‹ä»¶å¤„ç†
 $btnInstall.Add_Click({
     if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-        [System.Windows.Forms.MessageBox]::Show("ĞèÒª¹ÜÀíÔ±È¨ÏŞÔËĞĞ£¡", "¾¯¸æ")
+        [System.Windows.Forms.MessageBox]::Show("éœ€è¦ç®¡ç†å‘˜æƒé™è¿è¡Œï¼", "è­¦å‘Š")
         return
     }
 
@@ -108,7 +110,7 @@ $btnInstall.Add_Click({
         $_ -is [System.Windows.Forms.CheckBox] -and $_.Checked
     } | ForEach-Object { $_.Tag }
 
-    # ´´½¨»ù´¡Ä¿Â¼
+    # åˆ›å»ºåŸºç¡€ç›®å½•
     if (-not (Test-Path $baseDir)) {
         New-Item -Path $baseDir -ItemType Directory | Out-Null
     }
@@ -117,69 +119,69 @@ $btnInstall.Add_Click({
     $current = 0
     $progressBar.Value = 0
 
-    # ¼ì²âÏµÍ³¼Ü¹¹
+    # æ£€æµ‹ç³»ç»Ÿæ¶æ„
     $a = [System.Reflection.Assembly]::LoadWithPartialName("System.Runtime.InteropServices.RuntimeInformation")
     $t = $a.GetType("System.Runtime.InteropServices.RuntimeInformation")
     $p = $t.GetProperty("OSArchitecture")
     $osArch = $p.GetValue($null).ToString()
-    $txtLog.AppendText("¼ì²âµ½ÏµÍ³¼Ü¹¹: $osArch`n")
+    $txtLog.AppendText("æ£€æµ‹åˆ°ç³»ç»Ÿæ¶æ„: $osArch`n")
 
     foreach ($id in $selectedIDs) {
         $current++
         $app = $appConfig | Where-Object { $_.ID -eq $id }
         $installPath = Join-Path $baseDir $app.Path
 
-        # ¸üĞÂ½ø¶È
+        # æ›´æ–°è¿›åº¦
         $progressBar.Value = [math]::Min(100, [int]($current/$total*100))
-        $txtLog.AppendText("ÕıÔÚ°²×° [$current/$total] $($app.Name)...`n")
+        $txtLog.AppendText("æ­£åœ¨å®‰è£… [$current/$total] $($app.Name)...`n")
         $txtLog.ScrollToCaret()
 
-        # Ö´ĞĞ°²×°
+        # æ‰§è¡Œå®‰è£…
         try {
             if ($id -eq "astral-sh.uv") {
-                # UVµÄÌØÊâ°²×°·½Ê½
+                # UVçš„ç‰¹æ®Šå®‰è£…æ–¹å¼
                 $env:UV_INSTALL_DIR = $installPath
                 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" -ErrorAction Stop
                 $txtLog.SelectionColor = [System.Drawing.Color]::Green
-                $txtLog.AppendText("¡Ì °²×°³É¹¦ (Ê¹ÓÃ¹Ù·½½Å±¾)`n`n")
+                $txtLog.AppendText("âˆš å®‰è£…æˆåŠŸ (ä½¿ç”¨å®˜æ–¹è„šæœ¬)`n`n")
             }
-            elseif ($id -eq "LLVM.LLVM" -and $osArch -eq "Arm64") {
-                # ARM64¼Ü¹¹ÏÂµÄLLVM°²×°£¬ÓÅÏÈ³¢ÊÔarm64°æ±¾
-                $txtLog.AppendText("¼ì²âµ½ARM64¼Ü¹¹£¬³¢ÊÔ°²×°ARM64°æ±¾...`n")
+            elseif ($osArch -eq "Arm64" -and ($id -eq "LLVM.LLVM" -or $id -eq "Ninja-build.Ninja" -or $id -eq "Kitware.CMake")) {
+                # ARM64æ¶æ„ä¸‹çš„LLVMå®‰è£…ï¼Œä¼˜å…ˆå°è¯•arm64ç‰ˆæœ¬
+                $txtLog.AppendText("æ£€æµ‹åˆ°ARM64æ¶æ„ï¼Œå°è¯•å®‰è£…ARM64ç‰ˆæœ¬...`n")
                 try {
                     $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --architecture arm64 --location `"$installPath`""
                     Invoke-Expression $command -ErrorAction Stop
                     $txtLog.SelectionColor = [System.Drawing.Color]::Green
-                    $txtLog.AppendText("¡Ì ARM64°æ±¾°²×°³É¹¦`n`n")
+                    $txtLog.AppendText("âˆš ARM64ç‰ˆæœ¬å®‰è£…æˆåŠŸ`n`n")
                 }
                 catch {
                     $txtLog.SelectionColor = [System.Drawing.Color]::Orange
-                    $txtLog.AppendText("! ARM64°æ±¾°²×°Ê§°Ü£¬»ØÍËµ½Ä¬ÈÏ°æ±¾: $_`n")
-                    # »ØÍËµ½Ä¬ÈÏ°²×°
+                    $txtLog.AppendText("! ARM64ç‰ˆæœ¬å®‰è£…å¤±è´¥ï¼Œå›é€€åˆ°é»˜è®¤ç‰ˆæœ¬: $_`n")
+                    # å›é€€åˆ°é»˜è®¤å®‰è£…
                     $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --location `"$installPath`""
                     Invoke-Expression $command -ErrorAction Stop
                     $txtLog.SelectionColor = [System.Drawing.Color]::Green
-                    $txtLog.AppendText("¡Ì Ä¬ÈÏ°æ±¾°²×°³É¹¦`n`n")
+                    $txtLog.AppendText("âˆš é»˜è®¤ç‰ˆæœ¬å®‰è£…æˆåŠŸ`n`n")
                 }
             }
             else {
-                # ÆäËûÓ¦ÓÃµÄÄ¬ÈÏ°²×°·½Ê½
+                # å…¶ä»–åº”ç”¨çš„é»˜è®¤å®‰è£…æ–¹å¼
                 $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --location `"$installPath`""
                 Invoke-Expression $command -ErrorAction Stop
                 $txtLog.SelectionColor = [System.Drawing.Color]::Green
-                $txtLog.AppendText("¡Ì °²×°³É¹¦`n`n")
+                $txtLog.AppendText("âˆš å®‰è£…æˆåŠŸ`n`n")
             }
         }
         catch {
             $txtLog.SelectionColor = [System.Drawing.Color]::Red
-            $txtLog.AppendText("¡Á °²×°Ê§°Ü: $_`n`n")
+            $txtLog.AppendText("Ã— å®‰è£…å¤±è´¥: $_`n`n")
         }
     }
 
     $progressBar.Value = 100
-    [System.Windows.Forms.MessageBox]::Show("ËùÓĞ²Ù×÷ÒÑÍê³É£¡", "ÌáÊ¾")
+    [System.Windows.Forms.MessageBox]::Show("æ‰€æœ‰æ“ä½œå·²å®Œæˆï¼", "æç¤º")
     $btnInstall.Enabled = $true
 })
 
-# ÏÔÊ¾´°Ìå
+# æ˜¾ç¤ºçª—ä½“
 [void]$form.ShowDialog()
