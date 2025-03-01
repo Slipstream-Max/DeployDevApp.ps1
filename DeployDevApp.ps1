@@ -24,7 +24,7 @@ $appConfig = @(
 $labelDir = New-Object System.Windows.Forms.Label
 $labelDir.Location = New-Object System.Drawing.Point(20, 10)
 $labelDir.Size = New-Object System.Drawing.Size(200, 30)
-$labelDir.Text = "选择安装基础目录:"
+$labelDir.Text = "选择基础安装目录:"
 
 $txtDir = New-Object System.Windows.Forms.TextBox
 $txtDir.Location = New-Object System.Drawing.Point(20, 40)
@@ -74,7 +74,7 @@ $progressBar.Location = New-Object System.Drawing.Point(20, 550)
 $progressBar.Size = New-Object System.Drawing.Size(460, 30)
 $progressBar.Style = [System.Windows.Forms.ProgressBarStyle]::Continuous
 
-# 安装按钮（位置上移）
+# 安装按钮
 $btnInstall = New-Object System.Windows.Forms.Button
 $btnInstall.Location = New-Object System.Drawing.Point(20, 600)
 $btnInstall.Size = New-Object System.Drawing.Size(100, 35)
@@ -117,6 +117,13 @@ $btnInstall.Add_Click({
     $current = 0
     $progressBar.Value = 0
 
+    # 检测系统架构
+    $a = [System.Reflection.Assembly]::LoadWithPartialName("System.Runtime.InteropServices.RuntimeInformation")
+    $t = $a.GetType("System.Runtime.InteropServices.RuntimeInformation")
+    $p = $t.GetProperty("OSArchitecture")
+    $osArch = $p.GetValue($null).ToString()
+    $txtLog.AppendText("检测到系统架构: $osArch`n")
+
     foreach ($id in $selectedIDs) {
         $current++
         $app = $appConfig | Where-Object { $_.ID -eq $id }
@@ -129,10 +136,39 @@ $btnInstall.Add_Click({
 
         # 执行安装
         try {
-            $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --location `"$installPath`""
-            Invoke-Expression $command -ErrorAction Stop
-            $txtLog.SelectionColor = [System.Drawing.Color]::Green
-            $txtLog.AppendText("√ 安装成功`n`n")
+            if ($id -eq "astral-sh.uv") {
+                # UV的特殊安装方式
+                $env:UV_INSTALL_DIR = $installPath
+                powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" -ErrorAction Stop
+                $txtLog.SelectionColor = [System.Drawing.Color]::Green
+                $txtLog.AppendText("√ 安装成功 (使用官方脚本)`n`n")
+            }
+            elseif ($id -eq "LLVM.LLVM" -and $osArch -eq "Arm64") {
+                # ARM64架构下的LLVM安装，优先尝试arm64版本
+                $txtLog.AppendText("检测到ARM64架构，尝试安装ARM64版本...`n")
+                try {
+                    $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --architecture arm64 --location `"$installPath`""
+                    Invoke-Expression $command -ErrorAction Stop
+                    $txtLog.SelectionColor = [System.Drawing.Color]::Green
+                    $txtLog.AppendText("√ ARM64版本安装成功`n`n")
+                }
+                catch {
+                    $txtLog.SelectionColor = [System.Drawing.Color]::Orange
+                    $txtLog.AppendText("! ARM64版本安装失败，回退到默认版本: $_`n")
+                    # 回退到默认安装
+                    $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --location `"$installPath`""
+                    Invoke-Expression $command -ErrorAction Stop
+                    $txtLog.SelectionColor = [System.Drawing.Color]::Green
+                    $txtLog.AppendText("√ 默认版本安装成功`n`n")
+                }
+            }
+            else {
+                # 其他应用的默认安装方式
+                $command = "winget install --id $id -e --accept-package-agreements --accept-source-agreements --location `"$installPath`""
+                Invoke-Expression $command -ErrorAction Stop
+                $txtLog.SelectionColor = [System.Drawing.Color]::Green
+                $txtLog.AppendText("√ 安装成功`n`n")
+            }
         }
         catch {
             $txtLog.SelectionColor = [System.Drawing.Color]::Red
